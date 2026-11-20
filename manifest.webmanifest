@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "SistersLabStock - ระบบจัดการสต็อก",
+  "short_name": "SistersLabStock",
+  "description": "ระบบจัดการสต็อก คลินิกเทคนิคการแพทย์ซิสเตอร์ ศูนย์ระยอง",
+  "lang": "th",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#17191c",
+  "theme_color": "#17191c",
+  "categories": ["business", "productivity", "medical"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "รับเข้า / เบิกออก", "url": "./#/move", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "สินค้าคงคลัง", "url": "./#/inventory", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "แจ้งเตือนอายุสินค้า", "url": "./#/alerts", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

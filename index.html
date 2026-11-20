@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SistersLabStock</title>
+  <meta name="description" content="ระบบจัดการสต็อก คลินิกเทคนิคการแพทย์ซิสเตอร์ ศูนย์ระยอง">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#17191c">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SistersLabStock">
+  <script>
+    try { document.documentElement.dataset.theme = localStorage.getItem('stock_theme') || 'light'; } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<section id="login-view" class="login hidden">
+  <div class="login-brand">
+    <div class="login-brand-inner">
+      <img src="https://i.postimg.cc/ZnZBK2JR/logo.png" alt="" class="login-logo">
+      <h1>SistersLabStock</h1>
+      <p>ระบบจัดการสต็อกเวชภัณฑ์และน้ำยา<br>คลินิกเทคนิคการแพทย์ซิสเตอร์ ศูนย์ระยอง</p>
+      <ul class="login-points">
+        <li><i class="bi bi-arrow-left-right"></i> รับเข้า–เบิกออกหลายรายการในครั้งเดียว</li>
+        <li><i class="bi bi-hourglass-split"></i> แจ้งเตือนสินค้าใกล้หมดอายุอัตโนมัติ</li>
+        <li><i class="bi bi-broadcast"></i> ข้อมูลอัปเดตพร้อมกันทุกเครื่อง</li>
+      </ul>
+    </div>
+  </div>
+  <div class="login-form-wrap">
+    <form class="login-form" id="login-form" autocomplete="on">
+      <img src="https://i.postimg.cc/ZnZBK2JR/logo.png" alt="" class="login-logo-sm">
+      <h2>เข้าสู่ระบบ</h2>
+      <p class="muted">กรอกชื่อผู้ใช้และรหัสผ่านของคุณ</p>
+      <label class="field">
+        <span>ชื่อผู้ใช้</span>
+        <input class="input" id="login-user" autocomplete="username" required>
+      </label>
+      <label class="field">
+        <span>รหัสผ่าน</span>
+        <div class="input-group">
+          <input class="input" id="login-pass" type="password" autocomplete="current-password" required>
+          <button type="button" class="btn btn-ghost btn-icon" id="login-toggle-pass" aria-label="แสดงรหัสผ่าน"><i class="bi bi-eye"></i></button>
+        </div>
+      </label>
+      <div class="form-error" id="login-error"></div>
+      <button class="btn btn-primary btn-lg btn-block" type="submit" id="login-submit">เข้าสู่ระบบ</button>
+      <button type="button" class="btn btn-ghost btn-block install-app-btn hidden"><i class="bi bi-download"></i> ติดตั้งแอปลงเครื่อง</button>
+    </form>
+  </div>
+</section>
+
+<!-- ================= APP ================= -->
+<div id="app-view" class="app hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <img src="https://i.postimg.cc/ZnZBK2JR/logo.png" alt="">
+      <div>
+        <strong>SistersLabStock</strong>
+        <small>คลินิกซิสเตอร์ ศูนย์ระยอง</small>
+      </div>
+    </div>
+    <nav class="sb-nav" id="sb-nav">
+      <a href="#/dashboard" data-page="dashboard"><i class="bi bi-grid-1x2"></i><span>ภาพรวม</span></a>
+      <div class="sb-group">งานประจำวัน</div>
+      <a href="#/move" data-page="move" data-role="Staff"><i class="bi bi-arrow-left-right"></i><span>รับเข้า / เบิกออก</span></a>
+      <a href="#/docs" data-page="docs"><i class="bi bi-journal-text"></i><span>ประวัติเอกสาร</span></a>
+      <div class="sb-group">คลังสินค้า</div>
+      <a href="#/inventory" data-page="inventory"><i class="bi bi-box-seam"></i><span>สินค้าคงคลัง</span></a>
+      <a href="#/alerts" data-page="alerts"><i class="bi bi-hourglass-split"></i><span>แจ้งเตือนอายุสินค้า</span><em class="sb-count hidden" id="sb-alert-count">0</em></a>
+      <a href="#/reorder" data-page="reorder"><i class="bi bi-cart3"></i><span>สินค้าที่ต้องสั่งซื้อ</span><em class="sb-count hidden" id="sb-reorder-count">0</em></a>
+      <div class="sb-group">รายงาน</div>
+      <a href="#/report" data-page="report"><i class="bi bi-bar-chart-line"></i><span>รายงานความเคลื่อนไหว</span></a>
+      <div class="sb-group" data-role="Admin">ผู้ดูแลระบบ</div>
+      <a href="#/settings" data-page="settings" data-role="Admin"><i class="bi bi-sliders"></i><span>ตั้งค่า Stock</span></a>
+      <a href="#/users" data-page="users" data-role="Admin"><i class="bi bi-people"></i><span>ผู้ใช้งาน</span></a>
+    </nav>
+    <div class="sb-foot">
+      <button class="sb-user" id="sb-user" type="button">
+        <span class="avatar" id="sb-avatar">A</span>
+        <span class="sb-user-text"><strong id="sb-name">-</strong><small id="sb-role">-</small></span>
+        <i class="bi bi-three-dots-vertical"></i>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="tb-title">
+        <h1 id="page-title">ภาพรวม</h1>
+        <p id="page-sub" class="muted"></p>
+      </div>
+      <div class="tb-search">
+        <i class="bi bi-search"></i>
+        <input id="global-search" class="input" placeholder="ค้นหาสินค้า / บาร์โค้ด / Lot" autocomplete="off">
+        <div class="dropdown hidden" id="global-search-results"></div>
+      </div>
+      <div class="tb-actions">
+        <span class="rt-pill hidden" id="rt-status" title="สถานะเรียลไทม์"><span class="dot"></span><span id="rt-status-text">เรียลไทม์</span></span>
+        <button class="btn btn-ghost btn-icon install-app-btn hidden" title="ติดตั้งแอป"><i class="bi bi-download"></i></button>
+        <button class="btn btn-ghost btn-icon" id="btn-theme" title="สลับโหมดสว่าง/มืด"><i class="bi bi-moon"></i></button>
+        <a class="btn btn-ghost btn-icon tb-bell" href="#/alerts" title="แจ้งเตือน"><i class="bi bi-bell"></i><em class="hidden" id="tb-bell-count">0</em></a>
+        <button class="btn btn-ghost btn-icon" id="btn-refresh" title="รีเฟรชข้อมูล"><i class="bi bi-arrow-clockwise"></i></button>
+        <button class="btn btn-ghost btn-icon mobile-only" id="btn-mobile-user" title="บัญชีผู้ใช้"><i class="bi bi-person-circle"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ===== DASHBOARD ===== -->
+      <section class="page" id="page-dashboard">
+        <div class="page-head">
+          <div>
+            <h2 id="dash-greet">สวัสดี</h2>
+            <p class="muted" id="dash-date"></p>
+          </div>
+          <div class="row-gap" data-role="Staff">
+            <a class="btn btn-primary" href="#/move?mode=IN"><i class="bi bi-box-arrow-in-down"></i> รับเข้า</a>
+            <a class="btn btn-out" href="#/move?mode=OUT"><i class="bi bi-box-arrow-up"></i> เบิกออก</a>
+          </div>
+        </div>
+
+        <div class="kpis" id="dash-kpis"></div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>สถานะอายุสินค้า</h3>
+            <select class="select select-sm" id="dash-trend-period">
+              <option value="daily">เทียบกับเมื่อวาน</option>
+              <option value="weekly">เทียบกับสัปดาห์ก่อน</option>
+              <option value="monthly">เทียบกับเดือนก่อน</option>
+            </select>
+          </div>
+          <div class="status-bar" id="dash-status-bar"></div>
+          <div class="status-legend" id="dash-status-legend"></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3>ต้องดำเนินการ</h3>
+              <div class="seg seg-sm" id="dash-urgent-tabs">
+                <button data-v="expiry" class="active">ใกล้หมดอายุ</button>
+                <button data-v="reorder">ต้องสั่งซื้อ</button>
+              </div>
+            </div>
+            <div id="dash-urgent"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>การเคลื่อนไหวสต็อก</h3>
+              <div class="row-gap">
+                <select class="select select-sm" id="dash-chart-product"><option value="ALL">ทุกสินค้า</option></select>
+                <select class="select select-sm" id="dash-chart-range">
+                  <option value="daily">รายวัน</option>
+                  <option value="weekly">รายสัปดาห์</option>
+                  <option value="monthly" selected>รายเดือน</option>
+                  <option value="yearly">รายปี</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-box"><canvas id="dash-chart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>เอกสารล่าสุด</h3>
+            <a href="#/docs" class="link">ดูทั้งหมด <i class="bi bi-arrow-right"></i></a>
+          </div>
+          <div id="dash-docs"></div>
+        </div>
+      </section>
+
+      <!-- ===== MOVE (IN / OUT) ===== -->
+      <section class="page" id="page-move">
+        <div class="mode-switch" id="mode-switch">
+          <button data-mode="IN" class="mode-in">
+            <i class="bi bi-box-arrow-in-down"></i>
+            <span><strong>รับเข้า</strong><small>เพิ่มสินค้าเข้าคลัง</small></span>
+            <em class="mode-count hidden"></em>
+          </button>
+          <button data-mode="OUT" class="mode-out">
+            <i class="bi bi-box-arrow-up"></i>
+            <span><strong>เบิกออก</strong><small>นำสินค้าออกจากคลัง</small></span>
+            <em class="mode-count hidden"></em>
+          </button>
+        </div>
+
+        <div class="move-layout">
+          <div class="move-left">
+            <div class="card step">
+              <div class="step-head"><span class="step-no">1</span><h3>ข้อมูลเอกสาร</h3></div>
+              <div class="form-grid g3">
+                <label class="field"><span>วันที่ทำรายการ</span><input type="date" class="input" id="mv-date"></label>
+                <label class="field"><span>คลังสินค้า <em class="req">*</em></span><select class="select" id="mv-warehouse"></select></label>
+                <label class="field"><span>หมายเหตุ / เลขที่อ้างอิง</span><input class="input" id="mv-note" placeholder="เช่น เลขที่ใบส่งของ, ผู้รับ"></label>
+              </div>
+            </div>
+
+            <div class="card step">
+              <div class="step-head">
+                <span class="step-no">2</span><h3>เพิ่มสินค้า</h3>
+                <div class="step-tools">
+                  <button class="btn btn-ghost btn-sm" id="mv-import-btn"><i class="bi bi-file-earmark-spreadsheet"></i> นำเข้าจาก Excel</button>
+                  <button class="btn btn-ghost btn-sm" id="mv-template-btn"><i class="bi bi-download"></i> แบบฟอร์ม</button>
+                  <input type="file" id="mv-import-file" accept=".xlsx,.xls,.csv" class="hidden">
+                </div>
+              </div>
+              <div class="scan-box">
+                <i class="bi bi-upc-scan"></i>
+                <input class="input input-lg" id="mv-search" placeholder="สแกนบาร์โค้ด หรือพิมพ์ชื่อสินค้า แล้วกด Enter" autocomplete="off">
+                <div class="dropdown hidden" id="mv-search-results"></div>
+              </div>
+              <div id="mv-picker" class="picker hidden"></div>
+              <p class="hint" id="mv-hint"><i class="bi bi-lightbulb"></i> ใช้เครื่องสแกนบาร์โค้ดได้เลย — สแกน → ใส่จำนวน → กด Enter ระบบจะเพิ่มลงรายการและพร้อมสแกนชิ้นถัดไป</p>
+            </div>
+          </div>
+
+          <div class="card step move-cart">
+            <div class="step-head">
+              <span class="step-no">3</span><h3>รายการในเอกสารนี้</h3>
+              <span class="pill" id="mv-cart-count">0 รายการ</span>
+            </div>
+            <div id="mv-cart"></div>
+          </div>
+        </div>
+
+        <div class="move-bar">
+          <div class="move-bar-info">
+            <span class="move-bar-type" id="mv-bar-type">รับเข้า</span>
+            <span id="mv-bar-summary">ยังไม่มีรายการ</span>
+          </div>
+          <div class="row-gap">
+            <button class="btn btn-ghost" id="mv-clear" title="ล้างรายการ"><i class="bi bi-trash3"></i><span class="hide-sm"> ล้างรายการ</span></button>
+            <button class="btn btn-primary btn-lg" id="mv-save" disabled><i class="bi bi-check2-circle"></i> <span>บันทึก</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== DOCUMENTS ===== -->
+      <section class="page" id="page-docs">
+        <div class="card">
+          <div class="filters">
+            <label class="field"><span>ตั้งแต่</span><input type="date" class="input" id="doc-start"></label>
+            <label class="field"><span>ถึง</span><input type="date" class="input" id="doc-end"></label>
+            <label class="field"><span>ประเภท</span>
+              <select class="select" id="doc-type"><option value="">ทั้งหมด</option><option value="IN">รับเข้า</option><option value="OUT">เบิกออก</option></select>
+            </label>
+            <label class="field grow"><span>ค้นหา</span><input class="input" id="doc-q" placeholder="เลขที่เอกสาร / ผู้ทำรายการ / หมายเหตุ"></label>
+          </div>
+        </div>
+        <div class="card p0"><div id="doc-table"></div></div>
+      </section>
+
+      <!-- ===== INVENTORY ===== -->
+      <section class="page" id="page-inventory">
+        <div class="card">
+          <div class="filters">
+            <label class="field"><span>คลังสินค้า</span><select class="select" id="inv-wh"></select></label>
+            <label class="field"><span>หมวดหมู่</span><select class="select" id="inv-cat"></select></label>
+            <label class="field grow"><span>ค้นหา</span><input class="input" id="inv-q" placeholder="ชื่อสินค้า / บาร์โค้ด / Lot"></label>
+            <div class="field"><span>มุมมอง</span>
+              <div class="seg" id="inv-view"><button data-v="lot" class="active">ตาม Lot</button><button data-v="product">ตามสินค้า</button></div>
+            </div>
+          </div>
+          <div class="chips" id="inv-status-chips"></div>
+        </div>
+        <div class="list-head">
+          <span class="muted" id="inv-summary"></span>
+          <div class="row-gap">
+            <button class="btn btn-ghost btn-sm" id="inv-excel"><i class="bi bi-file-earmark-spreadsheet"></i> Excel</button>
+            <button class="btn btn-ghost btn-sm" id="inv-pdf"><i class="bi bi-printer"></i> พิมพ์ PDF</button>
+          </div>
+        </div>
+        <div class="card p0"><div id="inv-table"></div></div>
+      </section>
+
+      <!-- ===== ALERTS ===== -->
+      <section class="page" id="page-alerts">
+        <div class="list-head">
+          <div class="seg" id="al-tabs">
+            <button data-v="pending" class="active">รอดำเนินการ <em id="al-count-pending">0</em></button>
+            <button data-v="history">ประวัติการจัดการ <em id="al-count-history">0</em></button>
+          </div>
+          <div class="row-gap">
+            <input class="input input-sm" id="al-q" placeholder="กรองรายการ">
+            <button class="btn btn-ghost btn-sm" id="al-pdf"><i class="bi bi-printer"></i> พิมพ์ PDF</button>
+          </div>
+        </div>
+        <p class="hint"><i class="bi bi-info-circle"></i> แสดงสินค้าที่เหลืออายุไม่เกิน 180 วัน — กด <b>รับทราบ</b> เมื่อตรวจสอบแล้ว หรือ <b>จัดการ</b> เพื่อบันทึกวิธีจัดการ (เช่น ส่งคืน, ทำลาย)</p>
+        <div class="card p0"><div id="al-table"></div></div>
+      </section>
+
+      <!-- ===== REORDER ===== -->
+      <section class="page" id="page-reorder">
+        <p class="hint"><i class="bi bi-info-circle"></i> สินค้าที่ยอดคงเหลือรวมทุก Lot ต่ำกว่าหรือเท่ากับ <b>Reorder Point</b> (ตั้งค่าได้ที่เมนู ตั้งค่า Stock)</p>
+        <div class="list-head">
+          <span class="muted" id="ro-summary"></span>
+          <button class="btn btn-ghost btn-sm" id="ro-pdf"><i class="bi bi-printer"></i> พิมพ์ใบสั่งซื้อ (PDF)</button>
+        </div>
+        <div class="card p0"><div id="ro-table"></div></div>
+      </section>
+
+      <!-- ===== REPORT ===== -->
+      <section class="page" id="page-report">
+        <div class="card">
+          <div class="filters">
+            <div class="field"><span>ช่วงเวลา</span>
+              <div class="seg" id="rp-presets">
+                <button data-v="thisMonth" class="active">เดือนนี้</button>
+                <button data-v="lastMonth">เดือนก่อน</button>
+                <button data-v="3m">3 เดือน</button>
+                <button data-v="year">ปีนี้</button>
+              </div>
+            </div>
+            <label class="field"><span>ตั้งแต่</span><input type="date" class="input" id="rp-start"></label>
+            <label class="field"><span>ถึง</span><input type="date" class="input" id="rp-end"></label>
+            <label class="field"><span>ประเภท</span>
+              <select class="select" id="rp-type"><option value="">ทั้งหมด</option><option value="IN">รับเข้า</option><option value="OUT">เบิกออก</option></select>
+            </label>
+            <label class="field grow"><span>ค้นหาสินค้า</span><input class="input" id="rp-q" placeholder="ชื่อ / บาร์โค้ด / Lot"></label>
+          </div>
+        </div>
+        <div class="kpis kpis-sm" id="rp-kpis"></div>
+        <div class="list-head">
+          <span class="muted" id="rp-summary"></span>
+          <div class="row-gap">
+            <button class="btn btn-ghost btn-sm" id="rp-excel"><i class="bi bi-file-earmark-spreadsheet"></i> Excel (แยกชีตตามสินค้า)</button>
+            <button class="btn btn-ghost btn-sm" id="rp-pdf"><i class="bi bi-printer"></i> พิมพ์ PDF</button>
+          </div>
+        </div>
+        <div class="card p0"><div id="rp-table"></div></div>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section class="page" id="page-settings">
+        <div class="seg seg-wide" id="st-tabs">
+          <button data-v="usage" class="active">1. อัตราการใช้ต่อวัน</button>
+          <button data-v="rop">2. Minimum / Safety / Reorder Point</button>
+          <button data-v="master">3. คลังสินค้า & หมวดหมู่</button>
+        </div>
+
+        <div id="st-usage" class="st-pane">
+          <div class="card">
+            <div class="filters">
+              <label class="field"><span>คำนวณจากการเบิกย้อนหลัง</span>
+                <select class="select" id="st-period"><option value="30">30 วัน</option><option value="60">60 วัน</option><option value="90">90 วัน</option></select>
+              </label>
+              <p class="hint grow"><i class="bi bi-info-circle"></i> รวมทุก Lot ของสินค้าเดียวกัน · ค่าเฉลี่ย = ยอดเบิกรวม ÷ จำนวนวันที่มีการเบิก · แก้ช่อง "ใช้ต่อวัน (ที่ใช้คำนวณ)" ได้</p>
+            </div>
+          </div>
+          <div class="card p0"><div id="st-usage-table"></div></div>
+        </div>
+
+        <div id="st-rop" class="st-pane hidden">
+          <div class="card">
+            <div class="filters">
+              <label class="field"><span>แสดง</span>
+                <select class="select" id="st-filter"><option value="ALL">ทั้งหมด</option><option value="HAS">มีข้อมูล</option><option value="NO">ยังไม่มีข้อมูล</option></select>
+              </label>
+              <p class="hint grow"><i class="bi bi-calculator"></i> Minimum = ใช้ต่อวัน × Lead Time · Safety = Minimum × 2 · Reorder Point = Minimum + Safety</p>
+              <button class="btn btn-primary" id="st-save"><i class="bi bi-save"></i> บันทึกการตั้งค่า</button>
+            </div>
+          </div>
+          <div class="card p0"><div id="st-rop-table"></div></div>
+        </div>
+
+        <div id="st-master" class="st-pane hidden">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><h3>คลังสินค้า</h3></div>
+              <form class="inline-form" id="st-wh-form"><input class="input" id="st-wh-name" placeholder="ชื่อคลังใหม่ เช่น ตู้เย็นใหญ่"><button class="btn btn-primary">เพิ่ม</button></form>
+              <div class="tag-list" id="st-wh-list"></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>หมวดหมู่</h3></div>
+              <form class="inline-form" id="st-cat-form"><input class="input" id="st-cat-name" placeholder="ชื่อหมวดใหม่ เช่น น้ำยา"><button class="btn btn-primary">เพิ่ม</button></form>
+              <div class="tag-list" id="st-cat-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== USERS ===== -->
+      <section class="page" id="page-users">
+        <div class="grid-2 users-grid">
+          <div class="card">
+            <div class="card-head"><h3>สร้างบัญชีผู้ใช้ใหม่</h3></div>
+            <form id="us-form" class="form-grid">
+              <label class="field"><span>ชื่อผู้ใช้ (Username) <em class="req">*</em></span><input class="input" id="us-username" autocomplete="off"></label>
+              <label class="field"><span>รหัสผ่าน <em class="req">*</em></span><input class="input" id="us-password" type="password" autocomplete="new-password" placeholder="อย่างน้อย 6 ตัวอักษร"></label>
+              <label class="field"><span>ชื่อที่แสดง <em class="req">*</em></span><input class="input" id="us-display"></label>
+              <label class="field"><span>อีเมล</span><input class="input" id="us-email" type="email" placeholder="example@email.com"></label>
+              <div class="field"><span>บทบาท</span>
+                <div class="role-cards" id="us-role">
+                  <label><input type="radio" name="role" value="Admin"><span><strong>Admin</strong><small>ใช้ได้ทุกเมนู</small></span></label>
+                  <label><input type="radio" name="role" value="Staff" checked><span><strong>Staff</strong><small>รับเข้า/เบิกออก ได้</small></span></label>
+                  <label><input type="radio" name="role" value="Viewer"><span><strong>Viewer</strong><small>ดูข้อมูลอย่างเดียว</small></span></label>
+                </div>
+              </div>
+              <label class="check"><input type="checkbox" id="us-alert"> รับการแจ้งเตือนทางอีเมล</label>
+              <div class="form-error" id="us-error"></div>
+              <button class="btn btn-primary btn-block"><i class="bi bi-person-plus"></i> สร้างบัญชี</button>
+            </form>
+          </div>
+          <div class="stack">
+            <div class="card p0">
+              <div class="card-head pad"><h3>ผู้ใช้งานทั้งหมด</h3></div>
+              <div id="us-table"></div>
+            </div>
+            <div class="card p0">
+              <div class="card-head pad">
+                <div class="seg seg-sm" id="us-log-tabs"><button data-v="login" class="active">ประวัติการเข้าสู่ระบบ</button><button data-v="audit">บันทึกกิจกรรม</button></div>
+              </div>
+              <div id="us-log" class="scroll-y"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Mobile bottom navigation -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <a href="#/dashboard" data-page="dashboard"><i class="bi bi-grid-1x2"></i><span>ภาพรวม</span></a>
+    <a href="#/move" data-page="move" data-role="Staff"><i class="bi bi-arrow-left-right"></i><span>รับ/เบิก</span></a>
+    <a href="#/inventory" data-page="inventory"><i class="bi bi-box-seam"></i><span>คงคลัง</span></a>
+    <a href="#/alerts" data-page="alerts"><i class="bi bi-hourglass-split"></i><span>แจ้งเตือน</span><em class="hidden" id="bn-alert-count"></em></a>
+    <button type="button" id="bn-more"><i class="bi bi-list"></i><span>เพิ่มเติม</span></button>
+  </nav>
+</div>
+
+<!-- Drawer (stock card / document detail) -->
+<div class="drawer-backdrop hidden" id="drawer-backdrop"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <div><h3 id="drawer-title"></h3><p class="muted" id="drawer-sub"></p></div>
+    <button class="btn btn-ghost btn-icon" id="drawer-close" aria-label="ปิด"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</aside>
+
+<div class="live-notice" id="live-notice"></div>
+<div id="pdf-root" class="pdf-root"></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
